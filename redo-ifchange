@@ -1,5 +1,1 @@
-#!/bin/sh
-
-for dep in $@; do
-    md5 -q $dep > ".redo/$REDO_TARGET/$dep"
-done
+redo

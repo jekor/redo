@@ -1,2 +1,2 @@
-redo-ifchange redo.hs README.txt
+redo-ifchange redo.hs
 ghc -v0 -o $3 redo.hs
