@@ -6,7 +6,7 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.Digest.Pure.MD5 as MD5
 import Data.Map.Lazy (insert, fromList, toList, adjust)
 import Data.Maybe (listToMaybe)
-import Debug.Trace (traceShow)
+-- import Debug.Trace (traceShow)
 import GHC.IO.Exception (IOErrorType(..))
 import System.Directory (renameFile, removeFile, doesFileExist, getDirectoryContents, removeDirectoryRecursive, createDirectoryIfMissing, getCurrentDirectory, setCurrentDirectory)
 import System.Environment (getArgs, getEnvironment, getProgName, lookupEnv)
@@ -16,7 +16,7 @@ import System.IO (hPutStrLn, stderr, hGetLine, withFile, IOMode(..), hFileSize)
 import System.IO.Error (ioeGetErrorType, isDoesNotExistError)
 import System.Process (createProcess, waitForProcess, shell, CreateProcess(..))
 
-traceShow' arg = traceShow arg arg
+-- traceShow' arg = traceShow arg arg
 
 metaDir = ".redo"
 
@@ -55,8 +55,8 @@ redo target dir = do
            ExitSuccess -> do
              size <- fileSize tmp
              if size > 0
-             then renameFile tmp target
-             else removeFile tmp
+               then renameFile tmp target
+               else removeFile tmp
            ExitFailure code -> do hPutStrLn stderr $ "Redo script exited with non-zero exit code: " ++ show code
                                   removeFile tmp
        tmp = target ++ "---redoing"
@@ -64,7 +64,7 @@ redo target dir = do
        missingDo = do
          exists <- doesFileExist target
          unless exists $ error $ "No .do file found for target '" ++ target ++ "'"
-       cmd path = unwords ["sh", path, "0", takeBaseName target, tmp, ">", tmp]
+       cmd path = unwords ["sh -e", path, "0", takeBaseName target, tmp, ">", tmp]
 
 doPath :: FilePath -> IO (Maybe FilePath)
 doPath target = listToMaybe `liftM` filterM doesFileExist candidates
@@ -76,9 +76,9 @@ upToDate :: FilePath -> IO Bool
 upToDate target = catch
   (do exists <- doesFileExist target
       if exists
-      then do md5s <- getDirectoryContents (metaDir </> target)
-              and `liftM` mapM depUpToDate md5s
-      else return False)
+        then do md5s <- getDirectoryContents (metaDir </> target)
+                and `liftM` mapM depUpToDate md5s
+        else return False)
   (\(_ :: IOException) -> return False)
  where depUpToDate :: String -> IO Bool
        depUpToDate oldMD5 = catch
