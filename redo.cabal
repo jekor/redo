@@ -1,5 +1,5 @@
 name:                redo
-version:             0.1.0
+version:             0.2.0
 synopsis:            software build system, make replacement, implementation of djb's redo
 description:         redo builds a target file from source files using a "do" script. It also tracks when source files have changed and rebuilds target files as necessary.
 homepage:            https://github.com/jekor/redo
