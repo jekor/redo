@@ -41,7 +41,7 @@ redo target dir = do
   unless upToDate' $ maybe missingDo redo' =<< doPath target
  where redo' :: FilePath -> IO ()
        redo' path = do
-         hPutStrLn stderr $ "redo " ++ show (dir </> target)
+         hPutStrLn stderr $ "redo " ++ (if dir == "./" then "" else dir) ++ target
          catchJust (guard . isDoesNotExistError)
                    (removeDirectoryRecursive metaDepsDir)
                    (\_ -> return ())
