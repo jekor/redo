@@ -10,7 +10,7 @@ import Data.Maybe (listToMaybe)
 import GHC.IO.Exception (IOErrorType(..))
 import System.Directory (renameFile, removeFile, doesFileExist, getDirectoryContents, removeDirectoryRecursive, createDirectoryIfMissing, getCurrentDirectory, setCurrentDirectory)
 import System.Environment (getArgs, getEnvironment, getProgName, lookupEnv)
-import System.Exit (ExitCode(..))
+import System.Exit (ExitCode(..), exitWith)
 import System.FilePath (hasExtension, replaceBaseName, takeBaseName, (</>), splitFileName)
 import System.IO (hPutStrLn, stderr, hGetLine, withFile, IOMode(..), hFileSize)
 import System.IO.Error (ioeGetErrorType, isDoesNotExistError)
@@ -59,6 +59,7 @@ redo target dir = do
                else removeFile tmp
            ExitFailure code -> do hPutStrLn stderr $ "Redo script exited with non-zero exit code: " ++ show code
                                   removeFile tmp
+                                  exitWith $ ExitFailure code
        tmp = target ++ "---redoing"
        metaDepsDir = metaDir </> target
        missingDo = do
