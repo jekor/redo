@@ -1,4 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_HADDOCK prune #-}
+
+module Main where
 
 import Control.Exception (catch, catchJust, IOException)
 import Control.Monad (filterM, liftM, unless, guard)
@@ -18,6 +21,7 @@ import System.Process (createProcess, waitForProcess, shell, CreateProcess(..))
 
 -- traceShow' arg = traceShow arg arg
 
+-- | This is the directory that redo will store and read metadata on targets from.
 metaDir = ".redo"
 
 main :: IO ()
@@ -35,7 +39,10 @@ main = do
     ("redo-ifchange", Nothing) -> error "Missing REDO_TARGET environment variable."
     _ -> return ()
 
-redo :: String -> FilePath -> IO ()
+-- | Rebuild a given target if it's out-of-date or doesn't exist.
+redo :: String    -- ^ target (file) name
+     -> FilePath  -- ^ the current directory (for output purposes only)
+     -> IO ()
 redo target dir = do
   upToDate' <- upToDate target
   unless upToDate' $ maybe missingDo redo' =<< doPath target
@@ -67,13 +74,17 @@ redo target dir = do
          unless exists $ error $ "No .do file found for target '" ++ target ++ "'"
        cmd path = unwords ["sh -e", path, "0", takeBaseName target, tmp, ">", tmp]
 
-doPath :: FilePath -> IO (Maybe FilePath)
+-- | Determine the .do script path for a given target name.
+doPath :: FilePath             -- ^ the target (file) name
+       -> IO (Maybe FilePath)  -- ^ the preferred .do script file if one exists
 doPath target = listToMaybe `liftM` filterM doesFileExist candidates
  where candidates = (target ++ ".do") : if hasExtension target
                                         then [replaceBaseName target "default" ++ ".do"]
                                         else []
 
-upToDate :: FilePath -> IO Bool
+-- | Determine whether or not a target is up-to-date (i.e. it exists and none of its dependencies have changed or are out-of-date themselves).
+upToDate :: FilePath  -- ^ the target (file) name
+         -> IO Bool   -- ^ True if the target is up-to-date
 upToDate target = catch
   (do exists <- doesFileExist target
       if exists
@@ -88,17 +99,32 @@ upToDate target = catch
              doScript <- doPath dep
              case doScript of
                Nothing -> return $ oldMD5 == newMD5
+               -- A dependency is up-to-date if the MD5s match and it itself is
+               -- up-to-date (i.e. all of its dependencies are up-to-date).
                Just _ -> do upToDate' <- upToDate dep
                             return $ (oldMD5 == newMD5) && upToDate')
          (\e -> return (ioeGetErrorType e == InappropriateType))
 
-fileMD5 :: FilePath -> IO String
+-- | Calculate the MD5 checksum of a file.
+--
+-- For example:
+--
+-- >>> fileMD5 "redo.hs"
+-- "29e57f39b7ea2795ab2e452ada562778"
+fileMD5 :: FilePath   -- ^ the file to calculate the checksum of
+        -> IO String  -- ^ a 32-character MD5 checksum
 fileMD5 path = (show . MD5.md5) `liftM` BL.readFile path
 
-writeMD5 :: String -> FilePath -> IO ()
+-- TODO: This function is confusing (which are we writing which for?).
+-- | Write out the MD5 checksum of a given dependency of a target.
+writeMD5 :: String    -- ^ the target (file) for this dependency
+         -> FilePath  -- ^ the file path of the dependency
+         -> IO ()
 writeMD5 redoTarget dep = do
   md5 <- fileMD5 dep
   writeFile (metaDir </> redoTarget </> md5) dep
 
-fileSize :: FilePath -> IO Integer
+-- | Determine a file's size.
+fileSize :: FilePath    -- ^ the file to determine the size of
+         -> IO Integer  -- ^ the file's size in bytes
 fileSize path = withFile path ReadMode hFileSize
