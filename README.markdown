@@ -63,7 +63,7 @@ Redo builds a target file by looking for a corresponding .do script. For example
 
 Your script is not required to use any of these arguments, although you will usually want to use `$2`.
 
-Scripts are executed by `/bin/sh` which you should assume is a standard Bourne Shell.
+Scripts are executed by `sh` which you should assume is a standard Bourne Shell.
 
 ### Atomic Output
 
@@ -128,6 +128,8 @@ I consider redo to be stable but not feature complete.
 Redo is used to build itself. However, it is not a very complicated program.
 
 Most of redis's build system (~200 lines of Make) was converted to .do scripts as a test of redo's suitability.
+
+Redo has only been tested on FreeBSD and Linux.
 
 ## Implementation Details
 
