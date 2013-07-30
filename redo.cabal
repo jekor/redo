@@ -9,7 +9,7 @@ license-file:        LICENSE
 author:              Chris Forno (jekor)
 maintainer:          jekor@jekor.com
 category:            Distribution
-build-type:          Simple
+build-type:          Custom
 cabal-version:       >=1.8
 tested-with:         GHC == 7.6.2
 
