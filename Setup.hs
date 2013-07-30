@@ -1,9 +1,16 @@
+{-# LANGUAGE CPP #-}
+
+import Control.Monad (unless)
 import Distribution.Simple
 import Distribution.Simple.InstallDirs (InstallDirs(..), fromPathTemplate, toPathTemplate)
 import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..))
 import Distribution.Simple.Setup (ConfigFlags(..), fromFlag, fromFlagOrDefault)
+import System.Directory (copyFile, doesFileExist)
 import System.FilePath ((</>))
+#if defined(mingw32_HOST_OS) || defined(__MINGW32__)
+#else
 import System.Posix.Files (createSymbolicLink)
+#endif
 
 main = defaultMainWithHooks simpleUserHooks {postInst = postInstall}
 
@@ -15,4 +22,10 @@ postInstall _ _ _ buildInfo = do
   -- let installDirs = absoluteInstallDirs pkgDesc buildInfo NoCopyDest
   let dirs = configInstallDirs $ configFlags buildInfo
       dir = (fromPathTemplate . fromFlag $ prefix dirs) </> (fromPathTemplate . fromFlagOrDefault (toPathTemplate "bin") $ bindir dirs)
-  createSymbolicLink (dir </> "redo") (dir </> "redo-ifchange")
+#if defined(mingw32_HOST_OS) || defined(__MINGW32__)
+  copyFile (dir </> "redo.exe") (dir </> "redo-ifchange.exe")
+#else
+  let symlink = (dir </> "redo-ifchange")
+  exists <- doesFileExist symlink
+  unless exists $ createSymbolicLink (dir </> "redo") symlink
+#endif
