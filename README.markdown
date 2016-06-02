@@ -49,7 +49,7 @@ pandoc $2.markdown
  * No built-in method to depend on environment variables or the contents of directories changing.
  * The need to distribute a redo implementation if you're distributing a source archive.
 
-Note that you can find a minimal implementation of redo written in bourne shell [here](https://raw.github.com/apenwarr/redo/blob/master/minimal/do). It's called "do" since it doesn't track changes to dependencies and always fully rebuilds the target(s), but it should be suitable for distributing with your source archive.
+Note that you can find a minimal implementation of redo written in bourne shell [here](https://github.com/apenwarr/redo/blob/master/minimal/do). It's called "do" since it doesn't track changes to dependencies and always fully rebuilds the target(s), but it should be suitable for distributing with your source archive.
 
 ## How to Use Redo in Your Project
 
