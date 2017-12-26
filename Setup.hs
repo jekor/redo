@@ -12,9 +12,9 @@ import System.FilePath ((</>))
 import System.Posix.Files (createSymbolicLink)
 #endif
 
-main = defaultMainWithHooks simpleUserHooks {postInst = postInstall}
+main = defaultMainWithHooks simpleUserHooks {postCopy = postCopy'}
 
-postInstall _ _ _ buildInfo = do
+postCopy' _ _ _ buildInfo = do
   -- I tried the following seemingly more correct way but received the error:
   -- "internal error InstallDirs.libsubdir". For now I gave up on tracking it
   -- down and switched to the following code. If you know what I'm doing wrong
